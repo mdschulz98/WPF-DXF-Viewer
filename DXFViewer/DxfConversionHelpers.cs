@@ -278,9 +278,28 @@ namespace DXFViewer
 
             PathGeometry geometry = CreateArcPathGeometry(arc);
             path.Data = geometry;
-            path.IsHitTestVisible = false;
+            path.IsHitTestVisible = true;
+
+            path.MouseEnter += Path_MouseEnter;
+            path.MouseLeave += Path_MouseLeave;
+            path.MouseDown += Path_MouseDown;
 
             return path;
+        }
+
+        private static void Path_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            Debug.WriteLine("ArcPath Clicked");
+        }
+
+        private static void Path_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            (sender as Path).Stroke = Brushes.SteelBlue;
+        }
+
+        private static void Path_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            (sender as Path).Stroke = Brushes.Red;
         }
 
         private static PathGeometry CreateArcPathGeometry(DXFArc arc)
@@ -409,8 +428,8 @@ namespace DXFViewer
 
         internal static Line CreateLine(Brush stroke, DXFLine line)
         {
-            Point start = new Point((float)line.Start.X, (float)-line.Start.Y);
-            Point end = new Point((float)line.End.X, (float)-line.End.Y);
+            Point start = new Point(line.Start.X.Value, -line.Start.Y.Value);
+            Point end = new Point(line.End.X.Value, -line.End.Y.Value);
 
             Line drawLine = new Line
             {
@@ -419,10 +438,29 @@ namespace DXFViewer
                 X2 = start.X,
                 Y1 = end.Y,
                 Y2 = start.Y,
-                IsHitTestVisible = false
+                IsHitTestVisible = true
             };
+            drawLine.MouseEnter += DrawLine_MouseEnter;
+            drawLine.MouseLeave += DrawLine_MouseLeave;
+            drawLine.MouseDown += DrawLine_MouseDown;
 
             return drawLine;
+        }
+
+        private static void DrawLine_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            Line theLine = sender as Line;
+            Debug.WriteLine($"Line from [{theLine.X1},{theLine.Y1}] to [{theLine.X2},{theLine.Y2}]");
+        }
+
+        private static void DrawLine_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            (sender as Line).Stroke = Brushes.SteelBlue;
+        }
+
+        private static void DrawLine_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            (sender as Line).Stroke = Brushes.Red;
         }
 
         internal static LineGeometry CreateLineGeometry(DXFLine line)

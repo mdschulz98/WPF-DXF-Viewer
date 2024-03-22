@@ -54,7 +54,7 @@
             ClipToBounds="True">
             <dxf:Viewer
                 x:Name="viewer"
-                FileName="DXF/heart.dxf"
+                FileName="DXF/HP_PCA_Coupon_Side_1.dxf"
                 PanEnabled="{Binding IsChecked, ElementName=btnPan}" />
         </Grid>
 

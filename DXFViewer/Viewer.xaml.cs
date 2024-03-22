@@ -96,8 +96,8 @@ namespace DXFViewer
         private static void OnFilenameChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var instance = (d as Viewer);
-            instance.LoadBackgroundGeometries();
-            //instance.LoadBackground();
+            //instance.LoadBackgroundGeometries();
+            instance.LoadBackground();
         }
 
         private void LoadBackground()
