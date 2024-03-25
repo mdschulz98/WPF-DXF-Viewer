@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace DXFLib
@@ -29,6 +30,7 @@ namespace DXFLib
                             if (casted != null)
                             {
                                 Entities.Add(casted.EntityName, t);
+                                Debug.WriteLine($"Adding {casted.EntityName}");
                             }
                         }
                     }

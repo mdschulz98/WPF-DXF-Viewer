@@ -111,12 +111,18 @@ namespace DXFViewer
             }
         }
 
+        static int lineCount = 0;
+        static int arcCount = 0;
+        static int lwPolyLineCount = 0;
+
         internal static void ConvertDxfEntityToShapes(DXFDocument document, DXFEntity entity, IList<Shape> shapes, Brush stroke)
         {
             switch (entity)
             {
                 case DXFLine line:
                 {
+                    lineCount++;
+                    Debug.WriteLine($"Line {lineCount}");
                     Line drawLine = CreateLine(stroke, line);
                     shapes.Add(drawLine);
                     break;
@@ -138,6 +144,8 @@ namespace DXFViewer
 
                 case DXFArc arc:
                 {
+                    arcCount++;
+                    Debug.WriteLine($"Arc {arcCount}");
                     var path = CreateArcPath(stroke, arc);
                     shapes.Add(path);
                     break;
@@ -152,6 +160,8 @@ namespace DXFViewer
 
                 case DXFLWPolyLine lwPolyLine:
                 {
+                    lwPolyLineCount++;
+                    Debug.WriteLine($"LwPolyLine {lwPolyLineCount}");
                     List<Shape> lines = CreateLWPolyLine(stroke, lwPolyLine);
                     lines.ForEach(x => shapes.Add(x));
                     break;
@@ -267,6 +277,7 @@ namespace DXFViewer
             figure.Segments = group;
 
             geometry.Figures.Add(figure);
+            Debug.WriteLine($"Created Solid at [{figure.StartPoint.X},{figure.StartPoint.Y}]");
 
             return geometry;
         }
@@ -328,6 +339,9 @@ namespace DXFViewer
             pathFigure.StartPoint = startPoint;
             pathFigure.Segments.Add(arcSegment);
             geometry.Figures.Add(pathFigure);
+
+            Debug.WriteLine($"Created ArcPath from [{startPoint.X},{startPoint.Y}] to [{endPoint.X},{endPoint.Y}] at angle [{arc.StartAngle},{arc.EndAngle}]");
+
             return geometry;
         }
 
@@ -346,6 +360,7 @@ namespace DXFViewer
             var top = (-center.Y - circle.Radius);
             Canvas.SetLeft(drawCircle, left);
             Canvas.SetTop(drawCircle, top);
+            Debug.WriteLine($"Created Circle at [{circle.Center.X},{circle.Center.Y}] with r={circle.Radius}");
 
             return drawCircle;
         }
@@ -422,6 +437,7 @@ namespace DXFViewer
                 ellipseGeometry.RadiusY = ellipseGeometry.RadiusX * ellipse.AxisRatio;
                 geometry = ellipseGeometry;
             }
+            Debug.WriteLine($"Created Ellipse at [{ellipse.Center.X.Value},{ellipse.Center.Y.Value}] with M={radiusX} and m={radiusY}");
 
             return geometry;
         }
@@ -442,7 +458,8 @@ namespace DXFViewer
             };
             drawLine.MouseEnter += DrawLine_MouseEnter;
             drawLine.MouseLeave += DrawLine_MouseLeave;
-            drawLine.MouseDown += DrawLine_MouseDown;
+            //drawLine.MouseDown += DrawLine_MouseDown;
+            Debug.WriteLine($"Created Line from [{drawLine.X1},{drawLine.Y1}] to [{drawLine.X2},{drawLine.Y2}]");
 
             return drawLine;
         }
@@ -483,6 +500,7 @@ namespace DXFViewer
 
             int count = isClosed ? polyLine.Elements.Count : polyLine.Elements.Count - 1;
             List<Shape> lines = new List<Shape>();
+            Debug.WriteLine("Created LWPolyLine:");
             for (int i = 1; i <= count; i++)
             {
                 DXFPoint vertex1 = (i == polyLine.Elements.Count) ? polyLine.Elements[0].Vertex : polyLine.Elements[i].Vertex;
@@ -500,10 +518,13 @@ namespace DXFViewer
                     X2 = start.X,
                     Y1 = end.Y,
                     Y2 = start.Y,
-                    IsHitTestVisible = false
+                    IsHitTestVisible = true
                 };
+                drawLine.MouseEnter += DrawLine_MouseEnter;
+                drawLine.MouseLeave += DrawLine_MouseLeave;
 
                 lines.Add(drawLine);
+                Debug.WriteLine($"\tLine from [{start.X},{start.Y}] to [{end.X},{end.Y}]");
             }
 
             return lines;
@@ -543,6 +564,7 @@ namespace DXFViewer
 
             int count = isClosed ? polyLine.Children.Count : polyLine.Children.Count - 1;
             List<Shape> lines = new List<Shape>();
+            Debug.WriteLine("Created PolyLine:");
             for (int i = 1; i <= count; i++)
             {
                 DXFVertex vertex1 = (i == polyLine.Children.Count) ? (DXFVertex)polyLine.Children[0] : (DXFVertex)polyLine.Children[i];
@@ -564,6 +586,7 @@ namespace DXFViewer
                 };
 
                 lines.Add(drawLine);
+                Debug.WriteLine($"\tLine from [{start.X},{start.Y}] to [{end.X},{end.Y}]");
             }
 
             return lines;
@@ -617,7 +640,9 @@ namespace DXFViewer
                     foreach (DXFEntity entity in document.Entities)
                         ConvertDxfEntityToShapes(document, entity, shapes, brush);
 
-                    Debug.WriteLine("Created shapes in {0}ms", DateTime.UtcNow.Subtract(start).TotalMilliseconds);
+                    Debug.WriteLine("Created {0} shapes in {1}ms", shapes.Count, DateTime.UtcNow.Subtract(start).TotalMilliseconds);
+
+
 
                     return (document, shapes);
                 }
